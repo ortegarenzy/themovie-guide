@@ -1,7 +1,7 @@
 The Movie Guide
 =================================================
 
-A basic TMDB API client built with [Sling Programming Language](http://eqdn.tech/sling) 
+A basic TMDB API client fully written in [Sling Programming Language](http://eqdn.tech/sling)
 
 Live Demo https://themovie-guide.herokuapp.com
 
