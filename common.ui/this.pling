@@ -1,0 +1,11 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+type = "library"
+
+preFilters += "@cape"
+preFilters += "@caveui"

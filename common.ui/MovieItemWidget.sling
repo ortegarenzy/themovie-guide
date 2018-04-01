@@ -1,0 +1,45 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class #widget:
+
+import tmdb.api
+
+ui LayerWidget
+{
+	CanvasWidget {
+		color = Color.white()
+	}
+	WebImageWidget image {
+		imageScaleMethod = ImageWidget.STRETCH
+	}
+}
+
+ctor(ctx as GuiApplicationContext)
+{
+	base(ctx)
+	forceCreateWidget()
+}
+
+var movieData as DynamicMap
+
+func initializeWidget override
+{
+	base.initializeWidget()
+	var thisWidget final = this
+	Widget.setWidgetClickHandler(this, func {
+		NavigationWidget.pushToContainer(thisWidget, new MovieContainerWidget(context).setWidgetData(movieData))
+	})
+}
+
+func setWidgetData(data as DynamicMap) as this
+{
+	assert data
+	movieData = data
+	image.setWidgetImageUrl(APIClient.getInstance().getImageURL(data.getString("poster_path")))
+	return this
+}

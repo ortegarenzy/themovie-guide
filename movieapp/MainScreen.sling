@@ -1,0 +1,36 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class is ScreenForWidget #screen #main:
+
+import cave
+import cave.ui
+import tmdb.api
+import common.ui
+
+func onPrepareScreen override
+{
+	base.onPrepareScreen()
+	lockToPortraitOrientation()
+}
+
+func initialize override
+{
+	base.initialize()
+	Theme.initialize(context)
+	var navi = new NavigationWidget(context)
+	navi.setWidgetEnableActionBar(false)
+	var layer = new LayerWidget(context)
+	layer.addWidget(CanvasWidget.forColor(context, context.getStyleColor("movie", "backgroundColor")))
+	var naviContainer = new LayerWidget(context)
+	naviContainer.addWidget(navi)
+	layer.addWidget(naviContainer)
+	APIClient.create(context, layer)
+	PopupManager.initialize(context, layer)
+	setWidget(layer)
+	navi.pushWidget(new MainWidget(context))
+}

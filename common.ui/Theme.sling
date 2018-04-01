@@ -1,0 +1,58 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class:
+
+import cave
+
+func initialize(ctx as GuiApplicationContext) static as bool
+{
+	assert ctx
+	var context final = ctx
+	var bigFont final = "12mm"
+	var titleFont final = "8mm"
+	var largestFont final = "4000um"
+	var extraLargeFont final = "3500um"
+	var largeFont final = "3200um"
+	var mediumFont final = "2400um"
+	var smallFont final = "1900um"
+	var extraSmallFont final = "1500um"
+	var padding final = "2200um"
+	var margin final = "2000um"
+	var spacing final = "1500um"
+	var roundingRadius final = "3000um"
+	context.setStyle("movie", {
+		"spacing" : spacing,
+		"margin" : margin,
+		"padding" : padding,
+		"extraSmallFont" : extraSmallFont,
+		"smallFont" : smallFont,
+		"mediumFont" : mediumFont,
+		"largeFont" : largeFont,
+		"largestFont" : largestFont,
+		"extraLargeFont": extraLargeFont,
+		"roundingRadius" : roundingRadius,
+		"bigFont" : bigFont,
+		"titleFont" : titleFont,
+		"white" : Color.white(),
+		"backgroundColor" : Color.instance("#262728"),
+		"actionBarBackgroundColor" : Color.instance("#262728"),
+		"textColor" : Color.instance("#aaabac"),
+		"headerBackgroundColor" : Color.instance("#1d1e1f"),
+		"outlineWidth" : "1px"
+	})
+	context.setStyle("LabelWidget", {
+		"textColor" : context.getStyleColor("movie", "textColor"),
+		"fontSize" : context.getStyleString("movie", "mediumFont"),
+		"fontFamily" : "Helvetica"
+	})
+	context.setStyle("TextInputWidget", {
+		"fontFamily" : "Helvetica"
+	})
+	Log.debug(context, "Movie App theme initialized")
+	return true
+}

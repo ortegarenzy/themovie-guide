@@ -1,0 +1,122 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class:
+
+import cave
+import cave.ui
+
+class MyContainer is ContainerWidget
+{
+	prop widget as Widget
+
+	func onWidgetHeightChanged(height as int #notLiteral) override
+	{
+		foreach child in Widget.getChildren(this):
+			Widget.move(child, Widget.getAbsoluteX(widget), Widget.getAbsoluteY(widget))
+	}
+
+	func computeWidgetLayout(widthConstraint as int #notLiteral) override
+	{
+		var w = widthConstraint
+		foreach child in Widget.getChildren(this) {
+			Widget.layout(child, w)
+			Widget.move(child, Widget.getAbsoluteX(widget), Widget.getAbsoluteY(widget))
+		}
+		Widget.setLayoutSize(this, widthConstraint, Widget.getHeight(this))
+	}
+}
+
+var context static as GuiApplicationContext
+var parent static as Widget
+var container static as MyContainer
+
+func initialize(ctx as GuiApplicationContext, parentWidget as Widget) static
+{
+	context = ctx
+	parent = parentWidget
+}
+
+func showBelow(w as Widget, widgetBelow as Widget) static
+{
+	assert w
+	assert widgetBelow
+	var widget final = w
+	var parentLayer as LayerWidget
+	IFDEF("target_html")
+	{
+		var div = HTMLDOM.createElement("div")
+		HTMLDOM.setStyle(div, "position", "fixed")
+		HTMLDOM.setStyle(div, "bottom", "0px")
+		HTMLDOM.setStyle(div, "top", "0px")
+		HTMLDOM.setStyle(div, "left", "0px")
+		HTMLDOM.setStyle(div, "right", "0px")
+		HTMLDOM.setStyle(div, "width", "100%")
+		HTMLDOM.setStyle(div, "height", "100%")
+		HTMLDOM.setStyle(div, "z-index", "999")
+		HTMLDOM.appendToBody(div)
+		parentLayer = new LayerWidget(context)
+		Widget.addToDomElement(parentLayer, div)
+	}
+	ELSE {
+		var parent = widget
+		while parent {
+			if parent is LayerWidget:
+				parentLayer = parent as! LayerWidget
+			parent = Widget.getParent(parent)
+		}
+		assert parentLayer:
+			ERROR("No LayerWidget was found in the widget tree. Cannot show popup!")
+	}
+	var vbox final = VerticalBoxWidget.forContext(context)
+	vbox.addWidget(widgetBelow)
+	container = new MyContainer(context)
+	container.setWidget(widget)
+	container.addWidget(vbox)
+	var layer = LayerWidget.forWidget(context, container)
+	parentLayer.addWidget(layer)
+	var close #used = func {
+		closePopup()
+	}
+	IFDEF "target_html" {
+		// FIXME: This is a workaround
+		if parentLayer is ContainerWidget {
+			(parentLayer as! ContainerWidget).togglePointerEventHandling(true)
+		}
+		lang "js" {{{
+			parentLayer.element.addEventListener("click", function(e) {
+				if((e.target == this.element) && (this.element.contains(e.target))) {
+					close();
+				}
+			}.bind(parentLayer));
+			var body = document.getElementsByTagName("body")[0];
+			body.addEventListener("scroll", function(e) {
+				console.log("-SCROLL-");
+			});
+		}}}
+	}
+	ELSE {
+		Widget.setWidgetClickHandler(parentLayer, closePopup)
+	}
+	var animationDestY final = Widget.getAbsoluteY(widget)
+	var ay final = context.getHeightValue("3mm")
+	Widget.move(vbox, Widget.getAbsoluteX(widget), (animationDestY + ay) as int)
+}
+
+func closePopup static
+{
+	var anim = WidgetAnimation.forDuration(context, 300)
+	anim.addFadeOut(container, false)
+	IFDEF "target_html"
+	{
+		var parent = HTMLDOM.getParentElement(HTMLDOM.getParentElement(HTMLDOM.getParentElement(container.element)))
+		anim.setEndListener(func {
+			HTMLDOM.remove(parent)
+		})
+	}
+	anim.start()
+}

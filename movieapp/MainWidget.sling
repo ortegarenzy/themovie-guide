@@ -1,0 +1,99 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class #widget:
+
+import common.ui
+
+class SearchInputWidget #widget
+{
+	ui VerticalBoxWidget
+	{
+		widthRequest = context.getHeightValue("50mm")
+		HorizontalBoxWidget hbox {
+			TextInputWidget text : 1.0 {
+				padding = context.getStylePixels("movie", "margin")
+				textColor = Color.white()
+				placeholder = "Enter Here...."
+				fontSize = context.getStylePixels("movie", "largeFont")
+				onEnterKeyPressed = func {
+					onEnterKeyPressed()
+				}
+			}
+			AlignWidget {
+				ImageWidget image : 1.0, 0.0 {
+					imageResource = "search"
+					imageScaleMethod = ImageWidget.FIT
+					imageHeight = context.getHeightValue("8000um")
+				}
+			}
+		}
+		HorizontalRulerWidget {
+		}
+	}
+
+	prop widgetOnSearchResults as function<void, string>
+
+	func initializeWidget override
+	{
+		base.initializeWidget()
+		Widget.setWidgetClickHandler(image, func {
+			if widgetOnSearchResults:
+				widgetOnSearchResults(text.getWidgetText())
+		})
+	}
+
+	func onEnterKeyPressed private
+	{
+		assert widgetOnSearchResults
+		widgetOnSearchResults(text.getWidgetText())
+	}
+}
+
+ui NavigationWidget
+{
+	enableSidebar = false
+	backgroundColor = context.getStyleColor("movie", "darkGrayColor")
+	actionBarBackgroundColor = context.getStyleColor("movie", "actionBarBackgroundColor")
+	actionBarTextColor = context.getStyleColor("movie", "textColor")
+}
+
+ctor(ctx as GuiApplicationContext)
+{
+	base(ctx)
+	forceCreateWidget()
+}
+
+func initializeWidget override
+{
+	base.initializeWidget()
+	actionBar.setWidgetTitleAlignment(0.0)
+	actionBar.setActionBarMargin(context.getHeightValue("2500um"))
+	actionBar.setActionBarMarginLeft(context.getHeightValue("20mm"))
+	actionBar.setActionBarMarginRight(context.getHeightValue("20mm"))
+	var title = assert actionBar.getWidgetTitleLabel()
+	title.setWidgetFontSize(context.getStylePixels("movie", "extraLargeFont"))
+}
+
+func getActionBarMenuItems override as vector<Widget>
+{
+	var searchInput = new SearchInputWidget(context)
+	searchInput.setWidgetOnSearchResults(func(keyword as string) {
+		onSearchForKeyword(keyword)
+	})
+	var v = new vector<Widget>
+	v += searchInput
+	return v
+}
+
+func createMainWidget override as Widget:
+	return new PopularMoviesWidget(context)
+
+func onSearchForKeyword(keyword as string)
+{
+	pushWidget(new SearchResultsWidget(context).setKeyword(keyword))
+}

@@ -1,0 +1,57 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class is TitledWidget is DisplayAwareWidget is ResponsiveAwareWidget #widget:
+
+import common.ui
+import tmdb.api
+
+ui ResponsiveWidget
+{
+	PageContainerWidget container {
+		GridWidget grid {
+			margin = context.getStylePixels("movie", "margin")
+			spacing = context.getHeightValue("5mm")
+			cellSize = context.getHeightValue("45mm")
+		}
+	}
+}
+
+ctor(ctx as GuiApplicationContext)
+{
+	base(ctx)
+	forceCreateWidget()
+}
+
+func getWidgetTitle as string:
+	return "The Movie Guide"
+
+func initializeWidget override
+{
+	base.initializeWidget()
+	container.setWidgetTitle("Popular Movies")
+	grid.setMaximumCols(5)
+}
+
+func onWidgetDisplayed
+{
+	APIClient.getInstance().discoverMovies(func(response as DynamicMap) {
+		var results = assert response.getDynamicVector("results")
+		foreach result as DynamicMap in results.toVector():
+			grid.addWidget(new MovieItemWidget(context).setWidgetData(result))
+	})
+}
+
+func doWideLayout
+{
+	grid.setMaximumCols(5)
+}
+
+func doNarrowLayout
+{
+	grid.setMaximumCols(2)
+}

@@ -1,0 +1,15 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+type = "library"
+preFilters += "@cape"
+
+defines = {
+	"API_KEY" : "d1ad0ac183251db6a05318b144a0b2fc",
+	"API_BASE_URL" : "https://api.themoviedb.org/3",
+	"API_IMAGE_BASE_URL" : "https://image.tmdb.org/t/p/w780/"
+}

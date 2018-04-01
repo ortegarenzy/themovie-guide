@@ -1,0 +1,158 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class is TitledWidget is ResponsiveAwareWidget #widget:
+
+import tmdb.api
+
+class CastProfileWidget #widget
+{
+	ui LayerWidget
+	{
+		CanvasWidget {
+			color = Color.white()
+		}
+		VerticalBoxWidget {
+			spacing = context.getStylePixels("movie", "spacing")
+			LayerWidget {
+				widthRequest = context.getHeightValue("25mm")
+				heightRequest = context.getHeightValue("35mm")
+				WebImageWidget image {
+					imageScaleMethod = ImageWidget.FILL
+				}
+			}
+			LabelWidget character {
+				fontSize = context.getStylePixels("movie", "mediumFont")
+				textAlign = LabelWidget.ALIGN_CENTER
+				textColor = Color.black()
+			}
+			LabelWidget name {
+				fontSize = context.getStylePixels("movie", "mediumFont")
+				textAlign = LabelWidget.ALIGN_CENTER
+				textColor = Color.black()
+			}
+		}
+	}
+
+	ctor(ctx as GuiApplicationContext)
+	{
+		base(ctx)
+		forceCreateWidget()
+	}
+
+	func setWidgetData(data as DynamicMap) as this
+	{
+		assert data
+		character.setWidgetText(data.getString("character"))
+		name.setWidgetText(data.getString("name"))
+		image.setWidgetImageUrl(APIClient.getInstance().getImageURL(data.getString("profile_path")))
+		return this
+	}
+}
+
+ui ResponsiveWidget
+{
+	PageContainerWidget {
+		fullScreen = true
+		WebImageWidget backImage {
+			imageScaleMethod = ImageWidget.FILL
+		}
+		VerticalScrollerWidget {
+			LayerWidget {
+				CanvasWidget {
+					color = Color.forRGBADouble(0, 0, 0, 0.5)
+				}
+				LayerWidget layer {
+					margin = context.getHeightValue("20mm")
+					VerticalBoxWidget {
+						LabelWidget title {
+							fontSize = context.getStylePixels("movie", "bigFont")
+							fontBold = true
+						}
+						HorizontalBoxWidget {
+							VerticalBoxWidget vbox : 1.0 {
+								spacing = context.getStylePixels("movie", "spacing")
+								margin = context.getStylePixels("movie", "margin")
+								LabelWidget overview {
+									fontSize = context.getStylePixels("movie", "largeFont")
+								}
+								LayerWidget castLayer {
+									marginTop = context.getStylePixels("movie", "margin")
+									VerticalBoxWidget {
+										spacing = context.getStylePixels("movie", "spacing")
+										LabelWidget {
+											text = "Cast"
+											fontSize = context.getStylePixels("movie", "largestFont")
+											fontBold = true
+										}
+										HorizontalBoxWidget castContainer {
+											spacing = context.getStylePixels("movie", "spacing")
+										}
+									}
+								}
+							}
+							ContainerWidget blackContainer : 0.5 {
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+ctor(ctx as GuiApplicationContext)
+{
+	base(ctx)
+	forceCreateWidget()
+	castProfilesVector = new vector<CastProfileWidget>
+}
+
+var castProfilesVector as vector<CastProfileWidget>
+var isNarrow = false
+
+func getWidgetTitle as string:
+	return "The Movie Guide"
+
+func setWidgetData(data as DynamicMap) as this
+{
+	assert data
+	title.setWidgetText(data.getString("title"))
+	overview.setWidgetText(data.getString("overview"))
+	backImage.setWidgetImageUrl(APIClient.getInstance().getImageURL(data.getString("backdrop_path")))
+	assert not isNarrow
+	APIClient.getInstance().getCreditsForMovie(data.getString("id"), func(response as DynamicMap, error as Error) {
+		assert response
+		var casts = assert response.getDynamicVector("cast")
+		var castsVector = assert casts.toVectorOfDynamicMaps()
+		for(var x = 0; x < 5; x++) {
+			var castData = castsVector[x]
+			if not castData:
+				continue
+			var castProfile = new CastProfileWidget(context).setWidgetData(castData)
+			castProfilesVector += castProfile
+			castContainer.addWidget(castProfile, 1.0)
+		}
+	})
+	return this
+}
+
+func doWideLayout
+{
+	isNarrow = false
+}
+
+func doNarrowLayout
+{
+	isNarrow = true
+	layer.setWidgetMargin(context.getHeightValue("1mm"))
+	vbox.setWidgetMargin(context.getHeightValue("1mm"))
+	title.setWidgetFontSize(context.getStylePixels("movie", "largeFont"))
+	overview.setWidgetFontSize(context.getStylePixels("movie", "largeFont"))
+	Widget.removeFromParent(blackContainer)
+	Widget.removeFromParent(castLayer)
+}

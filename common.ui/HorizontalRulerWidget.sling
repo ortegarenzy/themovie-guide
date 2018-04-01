@@ -1,0 +1,37 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class #widget:
+
+ui LayerWidget
+{
+	heightRequest = context.getHeightValue("1px")
+	CanvasWidget color {
+		color = Color.forRGBADouble(1.0, 1.0, 1.0, 0.05)
+	}
+}
+
+ctor(ctx as GuiApplicationContext)
+{
+	base(ctx)
+	forceCreateWidget()
+}
+
+prop widgetColor as Color
+
+func initializeWidget override
+{
+	base.initializeWidget()
+	if widgetColor:
+		color.setWidgetColor(widgetColor)
+}
+
+func setWidgetHeight(h as int) as this
+{
+	this.setWidgetHeightRequest(h)
+	return this
+}

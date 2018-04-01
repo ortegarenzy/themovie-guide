@@ -1,0 +1,92 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class is TitledWidget is DisplayAwareWidget #widget:
+
+import common.ui
+import tmdb.api
+
+class SearchResultItemWidget #widget
+{
+	ui LayerWidget
+	{
+		CanvasWidget {
+			color = context.getStyleColor("movie", "headerBackgroundColor")
+		}
+		HorizontalBoxWidget {
+			spacing = context.getStylePixels("movie", "spacing")
+			WebImageWidget image {
+				imageScaleMethod = ImageWidget.STRETCH
+				imageWidth = context.getHeightValue("35mm")
+				imageHeight = context.getHeightValue("45mm")
+			}
+			VerticalBoxWidget : 1.0 {
+				spacing = context.getStylePixels("movie", "spacing")
+				margin = context.getStylePixels("movie", "margin")
+				LabelWidget title {
+					fontSize = context.getStylePixels("movie", "largestFont")
+					fontBold = true
+				}
+				LabelWidget overview {
+					fontSize = context.getStylePixels("movie", "largeFont")
+				}
+				LabelWidget date {
+					fontSize = context.getStylePixels("movie", "largeFont")
+				}
+			}
+		}
+	}
+
+	ctor(ctx as GuiApplicationContext)
+	{
+		base(ctx)
+		forceCreateWidget()
+	}
+
+	func setWidgetData(data as DynamicMap) as this
+	{
+		assert data
+		var thisWidget final = this
+		var movieData final = data
+		title.setWidgetText(data.getString("title"))
+		overview.setWidgetText(data.getString("overview"))
+		date.setWidgetText(data.getString("release_date"))
+		image.setWidgetImageUrl(APIClient.getInstance().getImageURL(data.getString("poster_path")))
+		Widget.setWidgetClickHandler(this, func {
+			NavigationWidget.pushToContainer(thisWidget, new MovieContainerWidget(context).setWidgetData(movieData))
+		})
+		return this
+	}
+}
+
+ui LayerWidget
+{
+	PageContainerWidget {
+		title = "Search Result(s)"
+		VerticalBoxWidget vbox {
+			margin = context.getStylePixels("movie", "margin")
+			spacing = context.getHeightValue("5mm")
+		}
+	}
+}
+
+prop keyword as string
+
+func getWidgetTitle as string:
+	return "The Movie Guide"
+
+func onWidgetDisplayed
+{
+	assert String.isNotEmpty(keyword)
+	APIClient.getInstance().searchMovies(keyword, func(response as DynamicMap, error as Error) {
+		assert not error:
+			vbox.addWidget(AlignWidget.forWidget(context, LabelWidget.forText(context, error.toString())), 1.0)
+		var results = assert response.getDynamicVector("results")
+		foreach result as DynamicMap in results.toVector():
+			vbox.addWidget(new SearchResultItemWidget(context).setWidgetData(result))
+	})
+}

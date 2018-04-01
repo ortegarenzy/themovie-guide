@@ -1,0 +1,146 @@
+
+/*
+* This file is part of TheMovieGuide App
+* Copyright (c) 2018
+* All rights reserved.
+*/
+
+class is ResponsiveAwareWidget #widget:
+
+ui ResponsiveWidget
+{
+	VerticalScrollerWidget {
+		scrollBarDisabled = true
+		VerticalBoxWidget {
+			LayerWidget headerLayer {
+				heightRequest = context.getHeightValue("30mm")
+				CanvasWidget {
+					color = context.getStyleColor("movie", "headerBackgroundColor")
+				}
+				AlignWidget align {
+					marginLeft = context.getHeightValue("20mm")
+					marginRight = context.getHeightValue("20mm")
+					LabelWidget titleLabel : 0.0, 0.5 {
+						fontSize = context.getStylePixels("movie", "titleFont")
+					}
+				}
+			}
+			LayerWidget container : 1.0 {
+				marginTop = context.getStylePixels("movie", "margin")
+				marginLeft = context.getHeightValue("20mm")
+				marginRight = context.getHeightValue("20mm")
+			}
+			LayerWidget {
+				heightRequest = context.getHeightValue("15mm")
+				CanvasWidget {
+					color = context.getStyleColor("movie", "headerBackgroundColor")
+				}
+				HorizontalBoxWidget {
+					margin = context.getStylePixels("movie", "margin")
+					AlignWidget : 1.0 {
+						LabelWidget : 0.0, 0.5 {
+							text = "&copy; 2018 Designed and Developed by Renzy Ortega"
+							fontBold = true
+						}
+					}
+					LayerWidget {
+						margin = context.getStylePixels("movie", "margin")
+						ImageWidget githubLogo {
+							imageScaleMethod = ImageWidget.FIT
+							imageWidth = context.getHeightValue("6mm")
+							imageHeight = context.getHeightValue("6mm")
+							imageResource = "github"
+						}
+					}
+					ImageWidget tmdbLogo {
+						imageScaleMethod = ImageWidget.FIT
+						imageWidth = context.getHeightValue("20mm")
+						imageHeight = context.getHeightValue("20mm")
+						imageResource = "powered-by-tmdb"
+					}
+				}
+			}
+		}
+	}
+}
+
+ctor(ctx as GuiApplicationContext)
+{
+	base(ctx)
+	forceCreateWidget()
+	created = true
+}
+
+var created = false
+var titleLabel as LabelWidget
+
+func initializeWidget override
+{
+	base.initializeWidget()
+	Widget.setWidgetClickHandler(tmdbLogo, func {
+		onLinkClick("https://www.themoviedb.org/?language=en")
+	})
+	Widget.setWidgetClickHandler(githubLogo, func {
+		onLinkClick("https://github.com/ortegarenzy")
+	})
+}
+
+func onLinkClick(link as string)
+{
+	IFDEF "target_html" {
+		lang "js" {{{
+			window.open(link, "_blank");
+		}}}
+	}
+}
+
+func setWidgetTitle(title as string) as this
+{
+	assert titleLabel
+	titleLabel.setWidgetText(title)
+	return this
+}
+
+var fullScreen = false
+
+func setWidgetFullScreen(v as bool) as this
+{
+	assert v
+	fullScreen = v
+	Widget.removeFromParent(headerLayer)
+	container.setWidgetMargin(0)
+	return this
+}
+
+func addWidget(w as Widget) override as ContainerWidget
+{
+	if container && created {
+		Widget.addChild(container, w)
+		return this
+	}
+	return base.addWidget(w)
+}
+
+func doWideLayout
+{
+	headerLayer.setWidgetHeightRequest(context.getHeightValue("30mm"))
+	align.setWidgetMarginLeft(context.getHeightValue("20mm"))
+	align.setWidgetMarginRight(context.getHeightValue("20mm"))
+	if not fullScreen {
+		container.setWidgetMarginLeft(context.getHeightValue("20mm"))
+		container.setWidgetMarginRight(context.getHeightValue("20mm"))
+	}
+	titleLabel.setWidgetFontSize(context.getStylePixels("movie", "titleFont"))
+}
+
+func doNarrowLayout
+{
+	headerLayer.setWidgetHeightRequest(context.getHeightValue("15mm"))
+	align.setWidgetMarginLeft(context.getHeightValue("3mm"))
+	align.setWidgetMarginRight(context.getHeightValue("2mm"))
+	if not fullScreen {
+		container.setWidgetMarginLeft(context.getHeightValue("2mm"))
+		container.setWidgetMarginRight(context.getHeightValue("2mm"))
+	}
+	titleLabel.setWidgetFontSize(context.getStylePixels("movie", "largestFont"))
+}
