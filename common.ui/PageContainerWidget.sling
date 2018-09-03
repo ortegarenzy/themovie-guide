@@ -56,7 +56,7 @@ ui ResponsiveWidget
 						imageScaleMethod = ImageWidget.FIT
 						imageWidth = context.getHeightValue("20mm")
 						imageHeight = context.getHeightValue("20mm")
-						imageResource = "powered-by-tmdb"
+						imageResource = "poweredbytmdb"
 					}
 				}
 			}
@@ -72,7 +72,6 @@ ctor(ctx as GuiApplicationContext)
 }
 
 var created = false
-var titleLabel as LabelWidget
 
 func initializeWidget override
 {

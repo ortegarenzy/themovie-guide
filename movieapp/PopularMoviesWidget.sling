@@ -39,19 +39,26 @@ func initializeWidget override
 
 func onWidgetDisplayed
 {
-	APIClient.getInstance().discoverMovies(func(response as DynamicMap) {
+	var thisWidget final = this
+	var ctx final = context
+	APIClient.getInstance().discoverMovies(func(response as DynamicMap, error as Error) {
+		assert not error:
+			ctx.showErrorDialog(error.toString())
+		assert response
 		var results = assert response.getDynamicVector("results")
-		foreach result as DynamicMap in results.toVector():
-			grid.addWidget(new MovieItemWidget(context).setWidgetData(result))
+		foreach result as DynamicMap in results.toVector() {
+			var w = new MovieItemWidget(context)
+			w.setWidgetData(result)
+			w.setWidgetClickHandler(func(data as DynamicMap) {
+				NavigationWidget.pushToContainer(thisWidget, new MovieContainerWidget(context).setWidgetData(data))
+			})
+			grid.addWidget(w)
+		}
 	})
 }
 
-func doWideLayout
-{
+func doWideLayout:
 	grid.setMaximumCols(5)
-}
 
-func doNarrowLayout
-{
+func doNarrowLayout:
 	grid.setMaximumCols(2)
-}

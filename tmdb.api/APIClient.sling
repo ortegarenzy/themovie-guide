@@ -17,11 +17,11 @@ func create(context as GuiApplicationContext, parentWidget as Widget) static as 
 		Log.error(context, VALUE "__THIS__" .. ": Failed to create instance")
 	instance = new this()
 	Log.debug(context, "[" .. VALUE "__THIS__" .. "]: Using the configured API URL '" .. TMDB_API_BASE_URL .. "'")
-	instance.setApiUrl(VALUE "API_BASE_URL")
+	instance.setApiUrl(TMDB_API_BASE_URL)
 	instance.setContext(context)
 	instance.setParentWidget(parentWidget)
 	instance.setApiKey(VALUE "API_KEY")
-	instance.setApiImageBaseUrl(VALUE "API_IMAGE_BASE_URL")
+	instance.setApiImageBaseUrl(TMDB_IMAGE_BASE_URL)
 	Log.debug(context, VALUE "__THIS__" .. ": New instance successfully created")
 	return instance
 }

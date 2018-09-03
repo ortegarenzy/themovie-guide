@@ -73,8 +73,6 @@ func initializeWidget override
 	base.initializeWidget()
 	actionBar.setWidgetTitleAlignment(0.0)
 	actionBar.setActionBarMargin(context.getHeightValue("2500um"))
-	actionBar.setActionBarMarginLeft(context.getHeightValue("20mm"))
-	actionBar.setActionBarMarginRight(context.getHeightValue("20mm"))
 	var title = assert actionBar.getWidgetTitleLabel()
 	title.setWidgetFontSize(context.getStylePixels("movie", "extraLargeFont"))
 }

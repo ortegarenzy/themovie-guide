@@ -25,14 +25,15 @@ ctor(ctx as GuiApplicationContext)
 	forceCreateWidget()
 }
 
+prop widgetClickHandler as function<void, DynamicMap>
 var movieData as DynamicMap
 
 func initializeWidget override
 {
 	base.initializeWidget()
-	var thisWidget final = this
 	Widget.setWidgetClickHandler(this, func {
-		NavigationWidget.pushToContainer(thisWidget, new MovieContainerWidget(context).setWidgetData(movieData))
+		if widgetClickHandler:
+			widgetClickHandler(movieData)
 	})
 }
 
